@@ -1,46 +1,69 @@
 @import "tailwindcss";
 
-@theme {
+/* ── Semantic palette (theme-aware) ──────────────────────── */
+:root, [data-theme="dark"] {
+  --ink: #12120f;
+  --ink-soft: #1b1b17;
+  --ink-card: #22221d;
+  --line: #33332c;
+  --fg: #e7e5e4;
+  --fg-soft: #a8a29e;
+  --fg-mute: #78716c;
+  --gold: #c8b49c;
+  --gold-deep: #a68d6d;
+  --chart-grid: #2c2c26;
+  --tooltip-bg: #1b1b17;
+}
+
+[data-theme="light"] {
+  --ink: #f6f4ef;
+  --ink-soft: #ece8e0;
+  --ink-card: #ffffff;
+  --line: #ddd6c9;
+  --fg: #292524;
+  --fg-soft: #57534e;
+  --fg-mute: #8a8580;
+  --gold: #9c8564;
+  --gold-deep: #7d6748;
+  --chart-grid: #e5dfd4;
+  --tooltip-bg: #ffffff;
+}
+
+@theme inline {
   --font-sans: "Inter Variable", "Cairo", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Cormorant Garamond", serif;
 
-  --color-ink: #12120f;
-  --color-ink-soft: #1b1b17;
-  --color-ink-card: #22221d;
-  --color-gold: #c8b49c;
-  --color-gold-deep: #a68d6d;
-  --color-line: #33332c;
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-card: var(--ink-card);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --color-fg-mute: var(--fg-mute);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
 }
 
 body {
-  @apply bg-ink text-stone-200 font-sans antialiased;
+  @apply bg-ink text-fg font-sans antialiased;
 }
 
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-::-webkit-scrollbar-thumb {
-  background: #3a3a32;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar {width: 7px; height: 7px;}
+::-webkit-scrollbar-thumb {background: var(--line); border-radius: 10px;}
+::-webkit-scrollbar-track {background: transparent;}
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {opacity: 0; transform: translateY(8px);}
+  to {opacity: 1; transform: translateY(0);}
 }
-.fade-up {
-  animation: fade-up 0.4s ease both;
-}
+.fade-up {animation: fade-up 0.35s ease both;}
 
-/* Recharts text on dark surfaces */
-.recharts-text {
-  fill: #8a8a7e;
-  font-size: 11px;
+@keyframes pulse-dot {
+  0%, 100% {opacity: 1;}
+  50% {opacity: 0.35;}
 }
-.recharts-cartesian-grid line {
-  stroke: #2c2c26;
-}
+.pulse-dot {animation: pulse-dot 1.6s ease-in-out infinite;}
+
+/* Recharts adapts to theme */
+.recharts-text {fill: var(--fg-mute); font-size: 11px;}
+.recharts-cartesian-grid line {stroke: var(--chart-grid);}

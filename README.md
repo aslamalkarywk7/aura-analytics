@@ -1,86 +1,74 @@
-# Aura Analytics · لوحة التحليلات
+# Aura Suite — منصة الأعمال الشاملة
 
-**Live analytics dashboard for the ISLAM AL-NASHAR perfume store.**
+**Full business suite for the ISLAM AL-NASHAR perfume store** — a giant bilingual (Arabic RTL / English LTR) commerce management platform. React 19 + TypeScript + Vite 6 + Tailwind 4 + Recharts 3.
 
-A dark, bilingual (Arabic RTL / English LTR) admin dashboard that reads real commerce
-data from the store's API — revenue, orders, best sellers, fragrance-family performance,
-payment split, stock health and coupon usage — rendered with Recharts.
+تم توسيع لوحة التحليلات الأصلية إلى منصة كاملة من **9 وحدات** مع وضع بيانات تجريبية غنية يعمل بدون خادم.
 
----
+## الوحدات (9 صفحات كاملة)
 
-## Overview
+| الوحدة | المسار | المحتوى |
+|---|---|---|
+| **لوحة التحكم** | `#/` | 8 مؤشرات KPI مع مقارنات، مخطط إيرادات (7/14/30/90 يوم)، هدف الشهر، توزيع الدفع، العائلات العطرية، الأكثر مبيعًا، النشاط المباشر، صحة المخزون |
+| **التحليلات** | `#/analytics` | مصادر الزيارات، قمع التحويل بخطوات الفقد، الأجهزة، خريطة كثافة الطلبات (ساعة×يوم)، Cohorts الاحتفاظ بالعملاء |
+| **الطلبات** | `#/orders` | بحث + فلاتر (حالة/دفع)، ترقيم صفحات، نافذة تفاصيل بمسار زمني للطلب، تصدير CSV |
+| **المنتجات** | `#/products` | فلاتر (عائلة/مخزون) وترتيب، هوامش الربح، تقييمات، مخطط الأكثر مبيعًا، نافذة تفاصيل |
+| **العملاء** | `#/customers` | شرائح (VIP/وفيّ/منتظم/جديد)، توزيع جغرافي، LTV، معدل تكرار الشراء |
+| **المخزون** | `#/inventory` | مستودعات بنسب الاستخدام، قائمة إعادة التعبئة المقترحة، معدل الدوران، تغطية الأيام |
+| **التسويق** | `#/marketing` | حملات مع ROAS وأزرار تشغيل/إيقاف، مدير كوبونات (إضافة/تفعيل)، أداء القنوات |
+| **التقارير** | `#/reports` | ملخص شهري، VAT 15%، أداء التنفيذ، تصدير 4 تقارير CSV |
+| **الإعدادات** | `#/settings` | الملف الشخصي، إعدادات المتجر، اللغة، الوضع الداكن/الفاتح، التنبيهات، حالة الاتصال |
 
-This dashboard is the operations cockpit for the [islam-alnashar-perfumes](https://github.com/aslamalkarywk7/islam-alnashar-perfumes)
-platform. It authenticates against the store API as an **admin** (JWT), then consumes a single
-analytics endpoint that aggregates the SQLite order history server-side:
+## الميزات العابرة للوحدات
+
+- 🌐 **ثنائية اللغة** — عربي RTL / إنجليزي LTR مع تبديل فوري (`Intl` للتواريخ والأرقام والعملات)
+- 🌗 **وضع داكن/فاتح** — ثيم دلالي عبر CSS variables
+- 🔐 **دخول ذكي** — يجرّب الـ API الحي للمتجر على `:3001`، ويعود تلقائيًا لوضع بيانات تجريبية غنية إذا لم يكن الخادم متاحًا
+- 📊 بيانات محاكاة حتمية (seeded PRNG) — نفس الأرقام في كل تشغيل
+- 📁 تصدير CSV من كل وحدة (UTF-8 مع BOM لدعم العربية في Excel)
+- 📱 متجاوب بالكامل — شريط جانبي منزلق على الجوال
+
+## الاتصال بالمتجر الحي
+
+تحاول المنصة أولًا الاتصال بـ [islam-alnashar-perfumes](https://github.com/aslamalkarywk7/islam-alnashar-perfumes):
 
 ```
 POST /api/auth/login          → JWT (admin only)
-GET  /api/admin/analytics     → KPIs + 14-day series + breakdowns
+GET  /api/admin/analytics     → KPIs + series + breakdowns
 ```
 
-No hardcoded numbers: every chart is derived from live orders, so the dashboard stays correct
-as the store sells.
+عند تعذر الوصول للخادم تدخل تلقائيًا في **وضع العرض التجريبي** (24 منتج، 342 طلب، 168 عميل، 90 يوم من السلاسل الزمنية) — كل شيء يعمل فورًا بدون أي إعداد.
 
-## What it shows
-
-| Block | Source |
-| --- | --- |
-| Net revenue · orders · AOV · cancelled | `kpis` (paid-status aggregation) |
-| Revenue — last 14 days (area chart) | `daily` (zero-filled via recursive CTE) |
-| Payment method split (donut) | `payment_split` |
-| Revenue by fragrance family (bars) | `family_revenue` (join orders → items → products → categories) |
-| Best sellers (progress list) | `top_products` |
-| Orders by status | `status_breakdown` |
-| Stock health · coupons | `stock_health`, `coupons` |
-
-## Tech
-
-- React 19 + TypeScript (strict), Vite 6, Tailwind CSS 4
-- Recharts 3 for visualisation
-- lucide-react icons, Cairo + Inter self-hosted fonts
-- JWT stored in `localStorage`, 401 responses force re-login
-
-## Run
-
-The dashboard proxies `/api` to the store API on `:3001`.
+## التشغيل
 
 ```bash
-# 1) start the store (from the islam-alnashar-perfumes repo)
-npm run dev            # or: npm start  → http://localhost:3001
-
-# 2) start the dashboard
 npm install
-npm run dev            # → http://localhost:5174
+npm run dev      # http://localhost:5174
+npm run build    # بناء إنتاجي في dist/
+npm run lint     # فحص أنواع TypeScript الصارم
 ```
 
-Sign in with the admin account: **admin@aura.com / Admin@123**
+**الدخول:** `admin@aura.com` / `Admin@123`
 
-> The store seeds 26 demo orders spread over the last 14 days, so the dashboard is
-> populated immediately after `npm run db:reset` in the store repo.
-
-## Scripts
-
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Vite dev server on :5174 with API proxy |
-| `npm run build` | Production build to `dist/` |
-| `npm run preview` | Preview the production build |
-| `npm run lint` | Strict TypeScript check |
-
-## Structure
+## البنية
 
 ```
 src/
-├── App.tsx          # Login + dashboard (KPIs, four charts, breakdowns)
-├── lib/api.ts       # Fetch wrapper with JWT + typed errors
-├── index.css        # Dark luxury theme (ink / gold tokens)
-└── main.tsx         # Entry, self-hosted fonts
+├── App.tsx            # الراوتر + حماية المسارات (HashRouter)
+├── store.tsx          # حالة عامة: لغة/ثيم/دخول/وضع البيانات
+├── i18n.ts            # قاموس الترجمة الكامل (عربي/إنجليزي)
+├── index.css          # الثيم الدلالي + Tailwind 4
+├── components/
+│   ├── Shell.tsx      # الشريط الجانبي + العلوي + التنبيهات
+│   └── ui.tsx         # نظام التصميم: Card, Kpi, Badge, Modal, ...
+├── lib/
+│   ├── api.ts         # عميل API مع توكن
+│   ├── format.ts      # تنسيق Intl (عملة/أرقام/تواريخ) + CSV
+│   └── mock.ts        # بيانات العرض التجريبي الغنية
+└── pages/             # 9 وحدات + Login
 ```
 
 ## Roadmap
 
-- [ ] Date-range picker and CSV export
-- [ ] Per-product drill-down (views, conversion)
 - [ ] WebSocket live updates on new orders
 - [ ] Role scoping (read-only analyst accounts)
+- [ ] Per-product drill-down (views, conversion)
